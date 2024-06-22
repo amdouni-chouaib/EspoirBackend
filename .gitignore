@@ -1,0 +1,4 @@
+uploads/
+.env
+nodemon
+node_modules/
