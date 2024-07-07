@@ -4,7 +4,24 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 
 dotenv.config();
+const multer = require('multer');
 
+const path = require('path');
+
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));
+    }
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  exports.upload = upload;
 // Function to handle player login
 const login = async (req, res) => {
   try {

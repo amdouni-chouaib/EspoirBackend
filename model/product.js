@@ -10,15 +10,15 @@
         required: true
     },
     product_quantity: {
-        type: Number,
+        type: String,
         required: true
     },
     price: {
-        type: Number,
+        type: String,
         required: true
     },
     price_after_discount: {
-        type: Number,
+        type: String,
         required: true
     },
     picture: {

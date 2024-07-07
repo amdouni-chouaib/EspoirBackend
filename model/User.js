@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
   mobile: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   postedetravaille: { type: String },
-  motdepasse: { type: String, required: true }
+  motdepasse: { type: String, required: true },
+  role:{ type: String, default: 'user' },
 });
 
 const User = mongoose.model('User', userSchema);
