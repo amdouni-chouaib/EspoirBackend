@@ -1,27 +1,8 @@
-const User = require('../model/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const dotenv = require('dotenv');
+const User = require('../model/User');
+const { upload } = require('../middle/lol');
 
-dotenv.config();
-const multer = require('multer');
-
-const path = require('path');
-
-const fs = require('fs');
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname));
-    }
-  });
-  
-  const upload = multer({ storage: storage });
-  
-  exports.upload = upload;
 // Function to handle player login
 const login = async (req, res) => {
   try {
@@ -39,66 +20,55 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Generate JWT token (replace 'your_secret_key' with a strong secret key)
-    const token = jwt.sign({ user: player }, process.env.JWT_SECRET, {
-      expiresIn: '1h', // Set token expiration time (e.g., 1 hour)
-    });
+    // Generate JWT token
+    const token = jwt.sign({ user: player }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token }); // Send the JWT token in the response
+    res.status(200).json({ token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 const signup = async (req, res) => {
-  const {
-    nometprenomjoueur,
-    datedenaissance,
-    specialite,
-    preparationphy,
-    entrainementspe,
-    poste,
-    ecoleprim,
-    nometprenomparent,
-    mobile,
-    email,
-    postedetravaille,
-    motdepasse
-  } = req.body;
-
   try {
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(req.body.motdepasse, 10);
 
-    const hashedPassword = await bcrypt.hash(motdepasse, 10);
-
-    user = new User({
-      nometprenomjoueur,
-      datedenaissance,
-      specialite,
-      preparationphy,
-      entrainementspe,
-      poste,
-      ecoleprim,
-      nometprenomparent,
-      mobile,
-      email,
-      postedetravaille,
-      motdepasse: hashedPassword
+    // Create a new user instance
+    const user = new User({
+      nometprenomjoueur: req.body.nometprenomjoueur,
+      datedenaissance: req.body.datedenaissance,
+      specialite: req.body.specialite,
+      preparationphy: req.body.preparationphy,
+      entrainementspe: req.body.entrainementspe,
+      poste: req.body.poste,
+      picture: req.file.path,
+      ecoleprim: req.body.ecoleprim,
+      nometprenomparent: req.body.nometprenomparent,
+      mobile: req.body.mobile,
+      email: req.body.email,
+      postedetravaille: req.body.postedetravaille,
+      motdepasse: hashedPassword,
+      role: req.body.role || 'user' // Default role if not provided
     });
 
+    // Save the user to the database
     await user.save();
 
-    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    res.status(201).json({ token, user: { id: user._id, email: user.email, nometprenomjoueur: user.nometprenomjoueur } });
+    // Respond with success message
+    res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    // Handle errors
+    res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = { signup,login };
+// Upload user profile picture
+const uploadPicture = (req, res) => {
+  res.status(200).json({ message: 'Picture uploaded successfully', filePath: req.file.path });
+};
+
+module.exports = {
+  login,
+  signup,
+  uploadPicture,
+};

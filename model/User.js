@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   preparationphy: { type: String },
   entrainementspe: { type: String },
   poste: { type: String },
+  picture: { type: String },
   ecoleprim: { type: String },
   nometprenomparent: { type: String, required: true },
   mobile: { type: String, required: true },

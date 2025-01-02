@@ -87,7 +87,31 @@ exports.updateUser = async (req, res) => {
     res.status(400).json({ message: 'Error updating user', error });
   }
 };
+// Update a userprofile
+exports.updateUserP = async (req, res) => {
+  try {
+    const { nometprenomjoueur, mobile, email, motdepasse } = req.body;
 
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({message: 'User not found'});
+    }
+    console.log(user);
+    
+    user.nometprenomjoueur = nometprenomjoueur 
+   
+    user.mobile = mobile 
+    user.email = email 
+    if (motdepasse) {
+      user.motdepasse = await bcrypt.hash(motdepasse, 10);
+    }
+
+    await user.save();
+    res.status(200).json({ message: 'User updated successfully', user });
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating user', error });
+  }
+};
 // Delete a user
 exports.deleteUser = async (req, res) => {
   try {
